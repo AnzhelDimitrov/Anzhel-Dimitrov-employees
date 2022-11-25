@@ -8,7 +8,7 @@ function App() {
       header: false,
       skipEmptyLines: true,
       complete: function (rows) {
-        const projectsData = new Map();
+        const projectsEmpData = new Map();
 
         // Iterating through the CSV data
         rows.data.map((row) => {
@@ -24,18 +24,31 @@ function App() {
           };
           
           // Grouping the employees data by projects 
-          if (projectsData.has(projectId)){
-            let updatedProjectData = projectsData.get(projectId);
-            updatedProjectData.push(rowObj);
+          if (projectsEmpData.has(projectId)){
+            let prevEmpData = projectsEmpData.get(projectId);
+            
+            prevEmpData.forEach((empData) => {
+              if (dateFrom <= empData.dateTo && dateTo >= empData.dateFrom) {
+                // both employees have worked together
+                let overlap = Math.min(
+                  (dateTo - dateFrom), 
+                  (dateTo - empData.dateFrom), 
+                  (empData.dateTo - dateFrom), 
+                  (empData.dateTo - empData.dateFrom)
+                );
+                console.log(Math.ceil( overlap / (1000 * 3600 * 24)));
+              }
+            })
+            prevEmpData.push(rowObj);
 
-            projectsData.set(projectId, updatedProjectData);
+            projectsEmpData.set(projectId, prevEmpData);
           } else {
-            projectsData.set(projectId, [rowObj]);
+            projectsEmpData.set(projectId, [rowObj]);
           }
 
         });
 
-        console.log(projectsData);
+        console.log(projectsEmpData);
       },
     });
   };
