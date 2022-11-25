@@ -23,8 +23,8 @@ function App() {
         rows.data.map((row) => {
           let employeeId = row[0].trim();
           let projectId = row[1].trim();
-          let dateFrom = row[2].trim();
-          let dateTo = row[3].trim();
+          let dateFrom = new Date(row[2].trim());
+          let dateTo = "NULL" === row[3].trim() ? new Date() : new Date(row[3].trim());
 
           let rowObj = {
             employeeId: employeeId,
