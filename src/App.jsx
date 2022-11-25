@@ -16,24 +16,35 @@ function App() {
     Papa.parse(event.target.files[0], {
       header: false,
       skipEmptyLines: true,
-      complete: function (results) {
-        const rowsArray = [];
-        const valuesArray = [];
+      complete: function (rows) {
+        const projectsData = new Map();
 
-        // Iterating data to get column name and their values
-        results.data.map((d) => {
-          rowsArray.push(Object.keys(d));
-          valuesArray.push(Object.values(d));
+        // Iterating through the CSV data
+        rows.data.map((row) => {
+          let employeeId = row[0].trim();
+          let projectId = row[1].trim();
+          let dateFrom = row[2].trim();
+          let dateTo = row[3].trim();
+
+          let rowObj = {
+            employeeId: employeeId,
+            dateFrom: dateFrom,
+            dateTo: dateTo,
+          };
+          
+          // Grouping the employees data by projects 
+          if (projectsData.has(projectId)){
+            let updatedProjectData = projectsData.get(projectId);
+            updatedProjectData.push(rowObj);
+
+            projectsData.set(projectId, updatedProjectData);
+          } else {
+            projectsData.set(projectId, [rowObj]);
+          }
+
         });
 
-        // Parsed Data Response in array format
-        setParsedData(results.data);
-
-        // Filtered Column Names
-        setTableRows(rowsArray[0]);
-
-        // Filtered Values
-        setValues(valuesArray);
+        console.log(projectsData);
       },
     });
   };
