@@ -12,8 +12,8 @@ function App() {
         // usuing projectId (key) to find all employees working on a given project
         const projectsEmpData = new Map();
 
-        // using emplayee pair to find total working days
-        // key is in the form of '{empId1}-{empId2}'
+        //  using emplayee pair to find total working days
+        //  key is in the form of '{empId1}-{empId2}'
         const empPairDays = new Map();
 
         // using emplayee pair to find common projects and days worked
@@ -27,13 +27,17 @@ function App() {
         // we may have a few pairs of employees that have worked for the exact same period of time
         let empPairKeys = [];
 
-
+        let rowsData = rows.data;
         // Iterating through the CSV data
-        rows.data.map((rowData) => {
+        for (let i = 0; i < rowsData.length; i++) {
+          const rowData = rowsData[i];
+
           let employeeId = rowData[0].trim();
           let projectId = rowData[1].trim();
           let dateFrom = new Date(rowData[2].trim());
-          let dateTo = "NULL" === rowData[3].trim() ? new Date() : new Date(rowData[3].trim());
+          let dateTo = "NULL" === rowData[3].trim() ? new Date(new Date().toDateString()) : new Date(rowData[3].trim());
+          
+          if (dateTo < dateFrom) continue; // skipping invalid dates
 
           let rowObj = {
             employeeId: employeeId,
@@ -45,11 +49,10 @@ function App() {
           if (projectsEmpData.has(projectId)){
             let prevEmpData = projectsEmpData.get(projectId);
             
-            
             for (let i = 0; i < prevEmpData.length; i++) {
               const empData = prevEmpData[i];
 
-              if (employeeId === empData.employeeId) break;
+              if (employeeId === empData.employeeId) continue;
               if (dateFrom <= empData.dateTo && dateTo >= empData.dateFrom) {
                 // both employees have worked together
 
@@ -59,14 +62,13 @@ function App() {
                   (empData.dateTo - dateFrom), 
                   (empData.dateTo - empData.dateFrom)
                 );
-                const overlapDays = Math.ceil( overlap / (1000 * 3600 * 24));
+                const overlapDays = Math.ceil( overlap / (1000 * 3600 * 24)) + 1;
                 const empKey = generateEmpKey(employeeId, empData.employeeId);
 
                 const pairProjectObj = {
                   projectId: projectId,
                   daysWorked: overlapDays,
                 };
-
 
                 // adding data to empPairProjects
                 if (empPairProjects.has(empKey)) {
@@ -93,8 +95,7 @@ function App() {
                   // overriding maxTotalDays and clearing empPairKeys
                   maxTotalDays = updatedPairDays;
                   empPairKeys = [empKey];
-                }
-                if (updatedPairDays === maxTotalDays) {
+                } else if (updatedPairDays === maxTotalDays) {
                   // there is another pair with the same total number of days => adding to empPairKeys
                   empPairKeys.push(empKey);
                 }
@@ -106,14 +107,18 @@ function App() {
           } else {
             projectsEmpData.set(projectId, [rowObj]);
           }
-
-        });
-
+        }
+        
         // TODO: group grid data for pair projects
+        console.log("projectsEmpData");
         console.log(projectsEmpData);
+        console.log("empPairDays");
         console.log(empPairDays);
+        console.log("empPairProjects");
         console.log(empPairProjects);
+        console.log("maxTotalDays");
         console.log(maxTotalDays);
+        console.log("empPairKeys");
         console.log(empPairKeys);
       },
     });
@@ -127,9 +132,9 @@ function App() {
     if (emp1Num === emp2Num) {
       return;
     } else if (emp1Num > emp2Num) {
-      return `${emp1Num}-${emp2Num}`
-    } else {
       return `${emp2Num}-${emp1Num}`
+    } else {
+      return `${emp1Num}-${emp2Num}`
     } 
   };
 
