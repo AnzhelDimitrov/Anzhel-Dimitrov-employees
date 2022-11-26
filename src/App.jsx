@@ -44,18 +44,26 @@ function App() {
           if (projectsEmpData.has(projectId)){
             let prevEmpData = projectsEmpData.get(projectId);
             
-            prevEmpData.forEach((empData) => {
+            
+            for (let i = 0; i < prevEmpData.length; i++) {
+              const empData = prevEmpData[i];
+
+              if (employeeId === empData.employeeId) break;
               if (dateFrom <= empData.dateTo && dateTo >= empData.dateFrom) {
                 // both employees have worked together
-                let overlap = Math.min(
+
+                const overlap = Math.min(
                   (dateTo - dateFrom), 
                   (dateTo - empData.dateFrom), 
                   (empData.dateTo - dateFrom), 
                   (empData.dateTo - empData.dateFrom)
                 );
-                console.log(Math.ceil( overlap / (1000 * 3600 * 24)));
+                const overlapDays = Math.ceil( overlap / (1000 * 3600 * 24));
+                const empKey = generateEmpKey(employeeId, empData.employeeId);
+
+
               }
-            })
+            }
             prevEmpData.push(rowObj);
 
             projectsEmpData.set(projectId, prevEmpData);
@@ -68,6 +76,20 @@ function App() {
         console.log(projectsEmpData);
       },
     });
+  };
+
+  // generates emp key pair
+  const generateEmpKey = (emp1, emp2) => {
+    let emp1Num = parseInt(emp1);
+    let emp2Num = parseInt(emp2);
+
+    if (emp1Num === emp2Num) {
+      return;
+    } else if (emp1Num > emp2Num) {
+      return `${emp1Num}-${emp2Num}`
+    } else {
+      return `${emp2Num}-${emp1Num}`
+    } 
   };
 
   return (
