@@ -8,14 +8,31 @@ function App() {
       header: false,
       skipEmptyLines: true,
       complete: function (rows) {
+
+        // usuing projectId (key) to find all employees working on a given project
         const projectsEmpData = new Map();
 
+        // using emplayee pair to find total working days
+        // key is in the form of '{empId1}-{empId2}'
+        const empPairDays = new Map();
+
+        // using emplayee pair to find common projects and days worked
+        // key is in the form of '{empId1}-{empId2}'
+        const empPairProjects = new Map();
+
+        // storing data for the longest period of time that a pair has worked
+        let maxTotalDays = 0;
+
+        // key of the pair that has worked for the longest period of time
+        let empPairKey = '';
+
+
         // Iterating through the CSV data
-        rows.data.map((row) => {
-          let employeeId = row[0].trim();
-          let projectId = row[1].trim();
-          let dateFrom = new Date(row[2].trim());
-          let dateTo = "NULL" === row[3].trim() ? new Date() : new Date(row[3].trim());
+        rows.data.map((rowData) => {
+          let employeeId = rowData[0].trim();
+          let projectId = rowData[1].trim();
+          let dateFrom = new Date(rowData[2].trim());
+          let dateTo = "NULL" === rowData[3].trim() ? new Date() : new Date(rowData[3].trim());
 
           let rowObj = {
             employeeId: employeeId,
