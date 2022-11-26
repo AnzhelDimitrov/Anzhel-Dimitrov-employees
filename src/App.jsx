@@ -23,8 +23,9 @@ function App() {
         // storing data for the longest period of time that a pair has worked
         let maxTotalDays = 0;
 
-        // key of the pair that has worked for the longest period of time
-        let empPairKey = '';
+        // key of the pair(s) that has worked for the longest period of time
+        // we may have a few pairs of employees that have worked for the exact same period of time
+        let empPairKeys = [];
 
 
         // Iterating through the CSV data
@@ -61,7 +62,42 @@ function App() {
                 const overlapDays = Math.ceil( overlap / (1000 * 3600 * 24));
                 const empKey = generateEmpKey(employeeId, empData.employeeId);
 
+                const pairProjectObj = {
+                  projectId: projectId,
+                  daysWorked: overlapDays,
+                };
 
+
+                // adding data to empPairProjects
+                if (empPairProjects.has(empKey)) {
+                  let prevPairProjects = empPairProjects.get(empKey);
+                  prevPairProjects.push(pairProjectObj);
+                  empPairProjects.set(empKey, prevPairProjects);
+                } else {
+                  empPairProjects.set(empKey, [pairProjectObj]);
+                }
+
+                // adding data to empPairDays
+                let updatedPairDays;
+                if (empPairDays.has(empKey)) {
+                  updatedPairDays = empPairDays.get(empKey);
+                  updatedPairDays += overlapDays;
+                  empPairDays.set(empKey, updatedPairDays);
+                } else {
+                  updatedPairDays = overlapDays;
+                  empPairDays.set(empKey, overlapDays);
+                }
+
+                // check if pair days are more than the current max (maxTotalDays)
+                if (updatedPairDays > maxTotalDays) {
+                  // overriding maxTotalDays and clearing empPairKeys
+                  maxTotalDays = updatedPairDays;
+                  empPairKeys = [empKey];
+                }
+                if (updatedPairDays === maxTotalDays) {
+                  // there is another pair with the same total number of days => adding to empPairKeys
+                  empPairKeys.push(empKey);
+                }
               }
             }
             prevEmpData.push(rowObj);
@@ -73,7 +109,12 @@ function App() {
 
         });
 
+        // TODO: group grid data for pair projects
         console.log(projectsEmpData);
+        console.log(empPairDays);
+        console.log(empPairProjects);
+        console.log(maxTotalDays);
+        console.log(empPairKeys);
       },
     });
   };
