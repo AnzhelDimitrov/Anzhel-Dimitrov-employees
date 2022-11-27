@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import Papa from "papaparse";
 
+
 function App() {
+  const [values, setValues] = useState([]);
+
   const changeHandler = (event) => {
     // Passing file data (event.target.files[0]) to parse using Papa.parse
     Papa.parse(event.target.files[0], {
@@ -31,6 +34,7 @@ function App() {
         // Iterating through the CSV data
         for (let i = 0; i < rowsData.length; i++) {
           const rowData = rowsData[i];
+          if (rowData.length !== 4) continue; // skipping invalid rows
 
           let employeeId = rowData[0].trim();
           let projectId = rowData[1].trim();
@@ -108,8 +112,28 @@ function App() {
             projectsEmpData.set(projectId, [rowObj]);
           }
         }
+
+        const values = [];
+
+        empPairKeys.map((empPairKey) => {
+          const currEmpPairProjects = empPairProjects.get(empPairKey);
+            const empIds = empPairKey.split('-');
+  
+            currEmpPairProjects.forEach(currEmpPairProject => {
+              // TODO: group grid data for pair projects
+  
+              const gridRowObj = [
+                empIds[0],
+                empIds[1],
+                currEmpPairProject.projectId,
+                currEmpPairProject.daysWorked,
+              ]
+              values.push(gridRowObj);
+            });
+        });
+
+        setValues(values)
         
-        // TODO: group grid data for pair projects
         console.log("projectsEmpData");
         console.log(projectsEmpData);
         console.log("empPairDays");
@@ -141,13 +165,37 @@ function App() {
   return (
     <div>
       {/* File Uploader */}
-      <input
-        type="file"
-        name="file"
-        onChange={changeHandler}
-        accept=".csv"
-        style={{ display: "block", margin: "10px auto" }}
+      <div>
+        <input
+          type="file"
+          name="file"
+          onChange={changeHandler}
+          accept=".csv"
+          className="flex mx-auto"
       />
+      </div>
+      <table className="table-auto mx-auto">
+        <thead>
+          <tr>
+            <th>Employee ID #1</th>
+            <th>Employee ID #2</th>
+            <th>Project ID</th>
+            <th>Days worked</th>
+          </tr>
+        </thead>
+        <tbody>
+          {values && values.map((value, index) => {
+            return (
+              <tr key={index}>
+                {value.map((val, i) => {
+                  return <td key={i}>{val}</td>;
+                })}
+              </tr>
+            );
+          })}
+        </tbody>
+
+      </table>
     </div>
   );
 }
