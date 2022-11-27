@@ -4,6 +4,7 @@ import Papa from "papaparse";
 
 function App() {
   const [values, setValues] = useState([]);
+  const [maxDays, setMaxDays] = useState(null);
 
   const changeHandler = (event) => {
     // Passing file data (event.target.files[0]) to parse using Papa.parse
@@ -113,38 +114,10 @@ function App() {
           }
         }
 
-        const values = [];
+        const values = getGridData(empPairKeys, empPairProjects);
+        setValues(values);
 
-        empPairKeys.map((empPairKey) => {
-          const currEmpPairProjects = empPairProjects.get(empPairKey);
-            const empIds = empPairKey.split('-');
-  
-            currEmpPairProjects.forEach(currEmpPairProject => {
-              const empId1 = empIds[0];
-              const empId2 = empIds[1];
-              const projectId = currEmpPairProject.projectId;
-              const daysWorked = currEmpPairProject.daysWorked;
-  
-              const indexOfSameProject = values.findIndex(
-                v => v.projectId === projectId && v.empId1 === empId1 && v.empId2 === empId2);
-
-              if  (indexOfSameProject > -1){
-                const updatedProjData =  values[indexOfSameProject];
-                updatedProjData.daysWorked += daysWorked;
-                values[indexOfSameProject] = updatedProjData;
-              } else {
-                const gridRowObj = {
-                  empId1,
-                  empId2,
-                  projectId,
-                  daysWorked,
-                };
-                values.push(gridRowObj);
-              }
-            });
-        });
-
-        setValues(values)
+        setMaxDays(maxTotalDays);
         
         console.log("projectsEmpData");
         console.log(projectsEmpData);
@@ -174,56 +147,93 @@ function App() {
     } 
   };
 
+  // group the grid data
+  const getGridData = (empPairKeys, empPairProjects) => {
+    const values = [];
+
+    empPairKeys.map((empPairKey) => {
+      const currEmpPairProjects = empPairProjects.get(empPairKey);
+        const empIds = empPairKey.split('-');
+
+        currEmpPairProjects.forEach(currEmpPairProject => {
+          const empId1 = empIds[0];
+          const empId2 = empIds[1];
+          const projectId = currEmpPairProject.projectId;
+          const daysWorked = currEmpPairProject.daysWorked;
+
+          const indexOfSameProject = values.findIndex(
+            v => v.projectId === projectId && v.empId1 === empId1 && v.empId2 === empId2);
+
+          if  (indexOfSameProject > -1){
+            const updatedProjData =  values[indexOfSameProject];
+            updatedProjData.daysWorked += daysWorked;
+            values[indexOfSameProject] = updatedProjData;
+          } else {
+            const gridRowObj = {
+              empId1,
+              empId2,
+              projectId,
+              daysWorked,
+            };
+            values.push(gridRowObj);
+          }
+        });
+    });
+      
+    return values;
+  };
+
   return (
-    
-      <div className="relative w-full 
-           my-10 mx-auto bg-gray-300
-           xs:bg-gray-50 md: py-10
-           rounded-lg sm:w-3/5"
-      > {/* File Uploader */}
-        <input
-            type="file"
-            name="file"
-            onChange={changeHandler}
-            accept=".csv"
-            className="mx-auto mb-9 block text-lg text-slate-500
-            file:mr-4 file:py-2 file:px-4
-            file:rounded-full file:border-0
-            file:text-lg file:font-semibold
-            file:bg-violet-100 file:text-violet-700
-            hover:file:bg-violet-300
-            hover:file:cursor-pointer
-            "
-        />
-        <table className="table-auto mx-auto border text-left text-gray-500 dark:text-gray-400">
-          <thead className="text-gray-700 uppercase bg-violet-100 dark:bg-gray-700 dark:text-gray-400">
-            <tr>
-              <th scope="col" className="border p-2">Employee ID #1</th>
-              <th scope="col" className="border p-2">Employee ID #2</th>
-              <th scope="col" className="border p-2">Project ID</th>
-              <th scope="col" className="border p-2">Days worked</th>
-            </tr>
-          </thead>
-          <tbody>
-            {values && values.map((value, index) => {
-              return (
-                <tr
-                  className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"               
-                  key={index}>
-                    {Object.keys(value).map((i) => {
-                      return  <td
-                                className="py-2 px-4 border" 
-                                key={i}>{value[i]}
-                              </td>;
-                    })}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    
+    <div className="relative w-full 
+        my-10 mx-auto bg-gray-300
+        xs:bg-gray-50 md: py-10
+        rounded-lg sm:w-3/5
+        shadow-lg"
+    >
+      {/* File Uploader */}
+      <input
+          type="file"
+          name="file"
+          onChange={changeHandler}
+          accept=".csv"
+          className="mx-auto mb-9 block text-lg text-slate-500
+          file:mr-4 file:py-2 file:px-4
+          file:rounded-full file:border-0
+          file:text-lg file:font-semibold
+          file:bg-violet-100 file:text-violet-700
+          hover:file:bg-violet-300
+          hover:file:cursor-pointer"
+      />
+      <table className="table-auto mx-auto border border-violet-700 text-left text-gray-500 dark:text-gray-400">
+        <thead className="text-gray-700 uppercase bg-violet-100 dark:bg-gray-700 dark:text-gray-400">
+          <tr>
+            <th scope="col" className="border p-2">Employee ID #1</th>
+            <th scope="col" className="border p-2">Employee ID #2</th>
+            <th scope="col" className="border p-2">Project ID</th>
+            <th scope="col" className="border p-2">Days worked</th>
+          </tr>
+        </thead>
+        <tbody>
+          {values && values.map((value, index) => {
+            return (
+              <tr
+                className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"               
+                key={index}>
+                  {Object.keys(value).map((i) => {
+                    return  <td
+                              className="py-2 px-4 border" 
+                              key={i}>{value[i]}
+                            </td>;
+                  })}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      {maxDays && <div className="mx-auto w-48 text-gray-600 mt-3">
+          Total days worked: {maxDays}
+      </div>}
+    </div>
   );
 }
-
 export default App;
