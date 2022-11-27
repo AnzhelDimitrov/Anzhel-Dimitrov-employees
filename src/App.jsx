@@ -1,19 +1,18 @@
 import React, { useState } from "react";
 import Papa from "papaparse";
 
-
 function App() {
   const [values, setValues] = useState([]);
   const [maxDays, setMaxDays] = useState(null);
 
   const changeHandler = (event) => {
-    // Passing file data (event.target.files[0]) to parse using Papa.parse
+    // passing file data (event.target.files[0]) to parse using Papa.parse
     Papa.parse(event.target.files[0], {
       header: false,
       skipEmptyLines: true,
       complete: function (rows) {
 
-        // usuing projectId (key) to find all employees working on a given project
+        // using projectId (key) to find all employees working on a given project
         const projectsEmpData = new Map();
 
         //  using emplayee pair to find total working days
@@ -32,7 +31,7 @@ function App() {
         let empPairKeys = [];
 
         let rowsData = rows.data;
-        // Iterating through the CSV data
+        // iterating through the CSV data
         for (let i = 0; i < rowsData.length; i++) {
           const rowData = rowsData[i];
           if (rowData.length !== 4) continue; // skipping invalid rows
@@ -40,7 +39,9 @@ function App() {
           let employeeId = rowData[0].trim();
           let projectId = rowData[1].trim();
           let dateFrom = new Date(rowData[2].trim());
-          let dateTo = "NULL" === rowData[3].trim() ? new Date(new Date().toDateString()) : new Date(rowData[3].trim());
+          let dateTo = "NULL" === rowData[3].trim() 
+            ? new Date(new Date().toDateString())
+            : new Date(rowData[3].trim());
           
           if (dateTo < dateFrom) continue; // skipping invalid dates
 
@@ -50,7 +51,7 @@ function App() {
             dateTo: dateTo,
           };
           
-          // Grouping the employees data by projects 
+          // grouping the employees data by projects 
           if (projectsEmpData.has(projectId)){
             let prevEmpData = projectsEmpData.get(projectId);
             
@@ -60,7 +61,6 @@ function App() {
               if (employeeId === empData.employeeId) continue;
               if (dateFrom <= empData.dateTo && dateTo >= empData.dateFrom) {
                 // both employees have worked together
-
                 const overlap = Math.min(
                   (dateTo - dateFrom), 
                   (dateTo - empData.dateFrom), 
@@ -106,29 +106,19 @@ function App() {
                 }
               }
             }
-            prevEmpData.push(rowObj);
 
+            // updating the project data
+            prevEmpData.push(rowObj);
             projectsEmpData.set(projectId, prevEmpData);
           } else {
+            // adding data for the project
             projectsEmpData.set(projectId, [rowObj]);
           }
         }
 
         const values = getGridData(empPairKeys, empPairProjects);
         setValues(values);
-
         setMaxDays(maxTotalDays);
-        
-        console.log("projectsEmpData");
-        console.log(projectsEmpData);
-        console.log("empPairDays");
-        console.log(empPairDays);
-        console.log("empPairProjects");
-        console.log(empPairProjects);
-        console.log("maxTotalDays");
-        console.log(maxTotalDays);
-        console.log("empPairKeys");
-        console.log(empPairKeys);
       },
     });
   };
@@ -152,32 +142,35 @@ function App() {
     const values = [];
 
     empPairKeys.map((empPairKey) => {
-      const currEmpPairProjects = empPairProjects.get(empPairKey);
-        const empIds = empPairKey.split('-');
+      const currEmpPairProjects = empPairProjects.get(empPairKey); // get all pair projects
+      const empIds = empPairKey.split('-'); // get the employee pair ids
 
-        currEmpPairProjects.forEach(currEmpPairProject => {
-          const empId1 = empIds[0];
-          const empId2 = empIds[1];
-          const projectId = currEmpPairProject.projectId;
-          const daysWorked = currEmpPairProject.daysWorked;
+      currEmpPairProjects.forEach(currEmpPairProject => {
+        const empId1 = empIds[0];
+        const empId2 = empIds[1];
+        const projectId = currEmpPairProject.projectId;
+        const daysWorked = currEmpPairProject.daysWorked;
 
-          const indexOfSameProject = values.findIndex(
-            v => v.projectId === projectId && v.empId1 === empId1 && v.empId2 === empId2);
+        // check if there is an existing record about this project and employee pair
+        // showing only one entry for a given employee pair and project id
+        const indexOfSameProject = values.findIndex(
+          v => v.projectId === projectId && v.empId1 === empId1 && v.empId2 === empId2);
 
-          if  (indexOfSameProject > -1){
-            const updatedProjData =  values[indexOfSameProject];
-            updatedProjData.daysWorked += daysWorked;
-            values[indexOfSameProject] = updatedProjData;
-          } else {
-            const gridRowObj = {
-              empId1,
-              empId2,
-              projectId,
-              daysWorked,
-            };
-            values.push(gridRowObj);
-          }
-        });
+        if  (indexOfSameProject > -1) {
+          // updating the days worked to include the sum of all the days on a given project
+          const updatedProjData =  values[indexOfSameProject];
+          updatedProjData.daysWorked += daysWorked;
+          values[indexOfSameProject] = updatedProjData;
+        } else {
+          const gridRowObj = {
+            empId1,
+            empId2,
+            projectId,
+            daysWorked,
+          };
+          values.push(gridRowObj);
+        }
+      });
     });
       
     return values;
@@ -204,8 +197,10 @@ function App() {
           hover:file:bg-violet-300
           hover:file:cursor-pointer"
       />
-      <table className="table-auto mx-auto border border-violet-700 text-left text-gray-500 dark:text-gray-400">
-        <thead className="text-gray-700 uppercase bg-violet-300 dark:bg-gray-700 dark:text-gray-400">
+      <table className="table-auto mx-auto border border-violet-700
+        text-left text-gray-500 dark:text-gray-400">
+        <thead className="text-gray-700 uppercase bg-violet-300
+          dark:bg-gray-700 dark:text-gray-400">
           <tr>
             <th scope="col" className="border p-2">Employee ID #1</th>
             <th scope="col" className="border p-2">Employee ID #2</th>
@@ -231,7 +226,9 @@ function App() {
         </tbody>
       </table>
       <div className="mx-auto w-48 text-gray-600 mt-3">
-      {maxDays && maxDays !== 0 ? `Total days worked: ${maxDays}` : 'No Total days available'}
+      {maxDays && maxDays !== 0 
+        ? `Total days worked: ${maxDays}` 
+        : 'No Total days available'}
       </div>
     </div>
   );
