@@ -205,7 +205,7 @@ function App() {
           hover:file:cursor-pointer"
       />
       <table className="table-auto mx-auto border border-violet-700 text-left text-gray-500 dark:text-gray-400">
-        <thead className="text-gray-700 uppercase bg-violet-100 dark:bg-gray-700 dark:text-gray-400">
+        <thead className="text-gray-700 uppercase bg-violet-300 dark:bg-gray-700 dark:text-gray-400">
           <tr>
             <th scope="col" className="border p-2">Employee ID #1</th>
             <th scope="col" className="border p-2">Employee ID #2</th>
@@ -230,9 +230,9 @@ function App() {
           })}
         </tbody>
       </table>
-      {maxDays && <div className="mx-auto w-48 text-gray-600 mt-3">
-          Total days worked: {maxDays}
-      </div>}
+      <div className="mx-auto w-48 text-gray-600 mt-3">
+      {maxDays && maxDays !== 0 ? `Total days worked: ${maxDays}` : 'No Total days available'}
+      </div>
     </div>
   );
 }
