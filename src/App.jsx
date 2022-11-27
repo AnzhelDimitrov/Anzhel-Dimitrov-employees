@@ -120,15 +120,27 @@ function App() {
             const empIds = empPairKey.split('-');
   
             currEmpPairProjects.forEach(currEmpPairProject => {
-              // TODO: group grid data for pair projects
+              const empId1 = empIds[0];
+              const empId2 = empIds[1];
+              const projectId = currEmpPairProject.projectId;
+              const daysWorked = currEmpPairProject.daysWorked;
   
-              const gridRowObj = [
-                empIds[0],
-                empIds[1],
-                currEmpPairProject.projectId,
-                currEmpPairProject.daysWorked,
-              ]
-              values.push(gridRowObj);
+              const indexOfSameProject = values.findIndex(
+                v => v.projectId === projectId && v.empId1 === empId1 && v.empId2 === empId2);
+
+              if  (indexOfSameProject > -1){
+                const updatedProjData =  values[indexOfSameProject];
+                updatedProjData.daysWorked += daysWorked;
+                values[indexOfSameProject] = updatedProjData;
+              } else {
+                const gridRowObj = {
+                  empId1,
+                  empId2,
+                  projectId,
+                  daysWorked,
+                };
+                values.push(gridRowObj);
+              }
             });
         });
 
@@ -171,31 +183,34 @@ function App() {
           name="file"
           onChange={changeHandler}
           accept=".csv"
-          className="flex mx-auto"
+          className="flex mx-auto pl-20"
       />
       </div>
-      <table className="table-auto mx-auto">
-        <thead>
-          <tr>
-            <th>Employee ID #1</th>
-            <th>Employee ID #2</th>
-            <th>Project ID</th>
-            <th>Days worked</th>
-          </tr>
-        </thead>
-        <tbody>
-          {values && values.map((value, index) => {
-            return (
-              <tr key={index}>
-                {value.map((val, i) => {
-                  return <td key={i}>{val}</td>;
-                })}
-              </tr>
-            );
-          })}
-        </tbody>
-
-      </table>
+      <div className=" relative">
+        <table className="table-auto mx-auto border text-left text-gray-500 dark:text-gray-400">
+          <thead className="text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+              <th scope="col" className="border p-2">Employee ID #1</th>
+              <th scope="col" className="border p-2">Employee ID #2</th>
+              <th scope="col" className="border p-2">Project ID</th>
+              <th scope="col" className="border p-2">Days worked</th>
+            </tr>
+          </thead>
+          <tbody>
+            {values && values.map((value, index) => {
+              return (
+                <tr
+                  className=""               
+                  key={index}>
+                    {Object.keys(value).map((i) => {
+                      return <td key={i}>{value[i]}</td>;
+                    })}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
