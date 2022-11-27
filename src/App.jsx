@@ -175,20 +175,28 @@ function App() {
   };
 
   return (
-    <div>
-      {/* File Uploader */}
-      <div>
+    
+      <div className="relative w-full 
+           my-10 mx-auto bg-gray-300
+           xs:bg-gray-50 md: py-10
+           rounded-lg sm:w-3/5"
+      > {/* File Uploader */}
         <input
-          type="file"
-          name="file"
-          onChange={changeHandler}
-          accept=".csv"
-          className="flex mx-auto pl-20"
-      />
-      </div>
-      <div className=" relative">
+            type="file"
+            name="file"
+            onChange={changeHandler}
+            accept=".csv"
+            className="mx-auto mb-9 block text-lg text-slate-500
+            file:mr-4 file:py-2 file:px-4
+            file:rounded-full file:border-0
+            file:text-lg file:font-semibold
+            file:bg-violet-100 file:text-violet-700
+            hover:file:bg-violet-300
+            hover:file:cursor-pointer
+            "
+        />
         <table className="table-auto mx-auto border text-left text-gray-500 dark:text-gray-400">
-          <thead className="text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+          <thead className="text-gray-700 uppercase bg-violet-100 dark:bg-gray-700 dark:text-gray-400">
             <tr>
               <th scope="col" className="border p-2">Employee ID #1</th>
               <th scope="col" className="border p-2">Employee ID #2</th>
@@ -200,10 +208,13 @@ function App() {
             {values && values.map((value, index) => {
               return (
                 <tr
-                  className=""               
+                  className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"               
                   key={index}>
                     {Object.keys(value).map((i) => {
-                      return <td key={i}>{value[i]}</td>;
+                      return  <td
+                                className="py-2 px-4 border" 
+                                key={i}>{value[i]}
+                              </td>;
                     })}
                 </tr>
               );
@@ -211,7 +222,7 @@ function App() {
           </tbody>
         </table>
       </div>
-    </div>
+    
   );
 }
 
