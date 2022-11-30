@@ -6,6 +6,10 @@ function App() {
   const [maxDays, setMaxDays] = useState(null);
 
   const changeHandler = (event) => {
+    if (event.target.files[0].size > 3145728 ) {
+      alert("File size is too large");
+    }
+
     // passing file data (event.target.files[0]) to parse using Papa.parse
     Papa.parse(event.target.files[0], {
       header: false,
@@ -13,15 +17,18 @@ function App() {
       complete: function (rows) {
 
         // using projectId (key) to find all employees working on a given project
+        // value is an array of objects (employees) containing employeeId, dateFrom, dateTo
         const projectsEmpData = new Map();
-
-        //  using emplayee pair to find total working days
-        //  key is in the form of '{empId1}-{empId2}'
-        const empPairDays = new Map();
 
         // using emplayee pair to find common projects and days worked
         // key is in the form of '{empId1}-{empId2}'
+        // value is an array of objects (projects) containing projectId, daysWorked
         const empPairProjects = new Map();
+
+        //  using emplayee pair to find total working days
+        //  key is in the form of '{empId1}-{empId2}'
+        // values is a number (total days worked)
+        const empPairDays = new Map();
 
         // storing data for the longest period of time that a pair has worked
         let maxTotalDays = 0;
@@ -30,7 +37,7 @@ function App() {
         // we may have a few pairs of employees that have worked for the exact same period of time
         let empPairKeys = [];
 
-        let rowsData = rows.data;
+        const rowsData = rows.data;
         // iterating through the CSV data
         for (let i = 0; i < rowsData.length; i++) {
           const rowData = rowsData[i];
@@ -59,6 +66,7 @@ function App() {
               const empData = prevEmpData[i];
 
               if (employeeId === empData.employeeId) continue;
+              // checking if the employees have worked together
               if (dateFrom <= empData.dateTo && dateTo >= empData.dateFrom) {
                 // both employees have worked together
                 const overlap = Math.min(
@@ -71,7 +79,7 @@ function App() {
                 const empKey = generateEmpKey(employeeId, empData.employeeId);
 
                 const pairProjectObj = {
-                  projectId: projectId,
+                  projectId,
                   daysWorked: overlapDays,
                 };
 
